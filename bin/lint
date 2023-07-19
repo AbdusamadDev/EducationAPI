@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+APP_ARGUMENT="."
+
+if [ "$1" != "" ]; then
+  APP_ARGUMENT="$1"
+fi
+
+autoflake --in-place --recursive --exclude="*/migrations/*,venv,local,media,templates" "$APP_ARGUMENT"
+isort "$APP_ARGUMENT"
+black --line-length 120 "$APP_ARGUMENT"
+flake8 "$APP_ARGUMENT"
