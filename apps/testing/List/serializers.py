@@ -33,3 +33,4 @@ class VariationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variation
         fields = '__all__'
+        

@@ -1,28 +1,31 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
+
 # from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_201_CREATED,
-    HTTP_404_NOT_FOUND, 
-    HTTP_409_CONFLICT, 
-    HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
+    HTTP_413_REQUEST_ENTITY_TOO_LARGE,
 )
 
+from apps.users.models import User
+from apps.testing.Create.utils import decode_jwt
 from apps.testing.models import Question, Subject, Variation, TestResultModel
 from apps.testing.serializers import (
     TestSerializer,
     SubjectSerializer,
     QuestionSerializer,
-    VariationSerializer
+    VariationSerializer,
 )
 
 
 def home(request):
     return HttpResponse("[INFO] Application started successfully")
-
 
 
 class VariationCreateAPIView(CreateAPIView):
@@ -43,8 +46,10 @@ class VariationCreateAPIView(CreateAPIView):
         # Check if the maximum variation limit is reached
         if not self.get_object(question_id)[-1]:
             return Response(
-                data={"msg": f"Max variation limit for question {question_id} exceeded!"},
-                status=HTTP_413_REQUEST_ENTITY_TOO_LARGE
+                data={
+                    "msg": f"Max variation limit for question {question_id} exceeded!"
+                },
+                status=HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             )
 
         # Check if it is the last variation
@@ -53,9 +58,9 @@ class VariationCreateAPIView(CreateAPIView):
                 return Response(
                     data={
                         "msg": "Question has no correct variations, and this is the last variation. "
-                               "You must either mark it as correct or update another correct variation."
+                        "You must either mark it as correct or update another correct variation."
                     },
-                    status=HTTP_400_BAD_REQUEST
+                    status=HTTP_400_BAD_REQUEST,
                 )
 
         # Check if the variation being created has is_correct set to true
@@ -63,12 +68,15 @@ class VariationCreateAPIView(CreateAPIView):
             variations = self.get_object(question_id)[0]
             if variations.filter(is_correct=True).exists():
                 return Response(
-                    data={"msg": "There is already a correct answer for this question. Set the current "
-                                  "variation as incorrect instead."},
-                    status=HTTP_409_CONFLICT
+                    data={
+                        "msg": "There is already a correct answer for this question. Set the current "
+                        "variation as incorrect instead."
+                    },
+                    status=HTTP_409_CONFLICT,
                 )
 
         return super().post(request, *args, **kwargs)
+
 
 class QuestionsCreateAPIView(CreateAPIView):
     model = Question
@@ -83,10 +91,7 @@ class QuestionsCreateAPIView(CreateAPIView):
             return query < 4
         else:
             return Response(
-                data={
-                    "msg": "Please provide subject id"
-                },
-                status=HTTP_400_BAD_REQUEST
+                data={"msg": "Please provide subject id"}, status=HTTP_400_BAD_REQUEST
             )
 
     def post(self, request, *args, **kwargs):
@@ -97,8 +102,9 @@ class QuestionsCreateAPIView(CreateAPIView):
                 data={
                     "msg": f"Max question limit for subject id: {self.request.POST.get('subject_id')} exceeded!"
                 },
-                status=HTTP_413_REQUEST_ENTITY_TOO_LARGE
+                status=HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             )
+
 
 class SubjectCreateAPIView(CreateAPIView):
     model = Subject
@@ -106,57 +112,63 @@ class SubjectCreateAPIView(CreateAPIView):
     queryset = Subject.objects.all()
     # permission_classes = [IsAdminUser]
 
-class TestResultCreateAPIView(CreateAPIView):
+
+class TestResultCreateAPIView(APIView):
+    serializer_class = TestSerializer
     model = TestResultModel
     queryset = TestResultModel.objects.all()
-    serializer_class = TestSerializer
-    # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        questions = serializer.validated_data.get("questions")  # type: ignore
-        subject_id = serializer.validated_data.get("subject_id")  # type: ignore
+        questions = serializer.validated_data.get("questions")
+        subject_id = serializer.validated_data.get("subject_id")
         subject = Question.objects.filter(subject_id=subject_id)
         score = 0
-        # counter = 0
-        for question in questions:  # type: ignore
+        secret_key = ""
+
+        token = request.headers.get("Authorization").split(" ")[-1]
+        # decoded_token = jwt.decode(token, "change")
+        user_id = decode_jwt(token=token).get("user_id")
+        print("User ID:", user_id)
+
+        for question in questions:
             try:
                 choice = question.get("choice")
                 question_object = subject.get(id=question.get("question_id"))
-                print(question_object.pk)
+                print("Question Object PK:", question_object.pk)
+
                 try:
-                    print("Question Object PK: ", question_object.pk)
-                    print("Choice: ", choice)
-                    variations = Variation.objects.filter(question_id=question_object.pk).get(id=choice)
-                    print("Variation: ", variations)
-                # except:
-                #     print("Variation: ", variations)
+                    variations = Variation.objects.filter(
+                        question_id=question_object.pk
+                    ).get(id=choice)
+                    print("Variation:", variations)
                 except ObjectDoesNotExist:
                     return Response(
                         data={
                             "msg": f"Variation with id: {question_object.pk} does not exist"
                         },
-                        status=HTTP_404_NOT_FOUND
+                        status=HTTP_404_NOT_FOUND,
                     )
-                if variations.is_correct:  # type: ignore
+
+                if variations.is_correct:
                     score += 1
-            # except:
-            #     print("Subject", subject)
+
             except ObjectDoesNotExist:
                 return Response(
-                    data={
-                        "msg": f"Subject with id: {subject_id} does not exist!"
-                    },
-                    status=HTTP_404_NOT_FOUND
+                    data={"msg": f"Subject with id: {subject_id} does not exist!"},
+                    status=HTTP_404_NOT_FOUND,
                 )
-
-        print("Score: ", score)  # type: ignore
+        try:
+            user = User.objects.get(pk=user_id)
+        except ObjectDoesNotExist:
+            return Response(
+                data={"msg": f"User with id: {user_id} doesn't exist"},
+                status=HTTP_404_NOT_FOUND,
+            )
+        self.model.objects.create(result=score, user_id=user, subject_id=subject_id)
+        print("Score:", score)
         return Response(
-            data={
-                "score": score, 
-                "user": request.user.id, 
-                "subject_id": subject_id
-            }, 
-            status=HTTP_201_CREATED
+            data={"score": score, "user": user_id, "subject_id": str(subject_id)},
+            status=HTTP_201_CREATED,
         )

@@ -29,7 +29,7 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestResultModel
-        fields = ["user_id", "subject_id", "questions"]
+        fields = ["subject_id", "questions"]
 
 class VariationSerializer(serializers.ModelSerializer):
     class Meta:

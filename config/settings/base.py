@@ -12,8 +12,8 @@ DEBUG = True
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, "sample.dev.env"))
 
-# SECRET_KEY = env.str("SECRET_KEY")
-SECRET_KEY = "change"
+SECRET_KEY = env.str("SECRET_KEY")
+# SECRET_KEY = "change"
 
 ALLOWED_HOSTS = ["*"]
 

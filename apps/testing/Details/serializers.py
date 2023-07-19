@@ -29,7 +29,6 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ["text", "subject_id"]
 
 class VariationSerializer(serializers.ModelSerializer):
-    subject_id = SubjectSerializer()
     question_id = QuestionSerializer()
 
     class Meta:
