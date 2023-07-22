@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.testing.models import Question, Answer
+from apps.testing.models import Question, Answer, Quiz
 
 
 class AnswerListSerializer(serializers.ModelSerializer):
@@ -17,3 +17,14 @@ class QuestionListSerializer(serializers.ModelSerializer):
 
     def get_answers(self, obj):
         return AnswerListSerializer(obj.answers, many=True).data
+
+
+class QuizSerializer(serializers.ModelSerializer):
+    questions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Quiz
+        fields = ("id", "title", "questions")
+
+    def get_questions(self, obj):
+        return QuestionListSerializer(obj.question, many=True).data
