@@ -1,35 +1,70 @@
 from django.db import models
 from apps.users.models import User
 from apps.common.models import BaseModel
+from django.utils.translation import gettext_lazy as _
 
 
-class TestResultModel(models.Model):
-    user_id = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    result = models.IntegerField()
-    subject_id = models.ForeignKey(to="Subject", on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
+class Category(BaseModel):
+    name = models.CharField(max_length=255)
 
     def __str__(self):
-        return "Subject: %s --- User: %s --- Result: %s" % (self.subject_id, self.user_id, self.result)
+        return self.name
 
-class Subject(BaseModel):
-    subject = models.CharField(max_length=50)
+
+class Quiz(BaseModel):
+    title = models.CharField(max_length=255, default=_(
+        "New Quiz"), verbose_name=_("Quiz Title"))
+    category = models.ForeignKey(
+        Category, default=1, on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return self.subject
+        return self.title
+
+    class Meta:
+        verbose_name = _("Quiz")
+        verbose_name_plural = _("Quizzes")
+        ordering = ['id']
+
 
 class Question(BaseModel):
-    text = models.CharField(max_length=450)
-    subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(
+        Quiz, related_name='question', on_delete=models.DO_NOTHING)
+    title = models.CharField(max_length=255, verbose_name=_("Title"))
 
     def __str__(self):
-        return self.text
+        return self.title
+
+    class Meta:
+        verbose_name = _("Question")
+        verbose_name_plural = _("Questions")
+        ordering = ['id']
 
 
-class Variation(BaseModel):
-    text = models.CharField(max_length=80)
-    is_correct = models.BooleanField()
-    question_id = models.ForeignKey(to=Question, on_delete=models.CASCADE)
+class Answer(BaseModel):
+    question = models.ForeignKey(
+        Question, related_name='answers', on_delete=models.DO_NOTHING)
+    answer_text = models.CharField(
+        max_length=255, verbose_name=_("Answer Text"))
+    is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.text
+        return f"{self.answer_text}"
+
+    class Meta:
+        verbose_name = _("Answer")
+        verbose_name_plural = _("Answers")
+        ordering = ['id']
+
+
+class TestResult(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} | {self.quiz.category.name} |{self.score}"
+
+    class Meta:
+        verbose_name = _("TestResult")
+        verbose_name_plural = _("TestResults")
+        ordering = ['id']

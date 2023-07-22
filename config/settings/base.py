@@ -10,10 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEBUG = True
 # READING ENV
 env = environ.Env()
-env.read_env(os.path.join(BASE_DIR, "sample.dev.env"))
+env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SECRET_KEY = env.str("SECRET_KEY")
-# SECRET_KEY = "change"
 
 ALLOWED_HOSTS = ["*"]
 

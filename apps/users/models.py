@@ -23,6 +23,8 @@ class User(AbstractUser, BaseModel):
     def __str__(self):
         if self.email:
             return self.email
+        if self.full_name:
+            return self.full_name
 
     @property
     def tokens(self):
