@@ -1,6 +1,5 @@
-from drf_yasg.generators import OpenAPISchemaGenerator
-
 from django.conf import settings
+from drf_yasg.generators import OpenAPISchemaGenerator
 
 
 class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):

@@ -30,14 +30,3 @@ class Application(BaseModel):
     class Meta:
         verbose_name = _("Application")
         verbose_name_plural = _("Applications")
-
-#
-# class ApplicationDocument(BaseModel):
-#     title = models.CharField(_("Title"), max_length=256)
-#     file = models.FileField(upload_to="applications/%Y/%m/%d")
-#     # FK
-#     application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name="documents")
-#
-#     class Meta:
-#         verbose_name = _("ApplicationDocument")
-#         verbose_name_plural = _("ApplicationDocuments")

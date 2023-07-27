@@ -10,7 +10,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.users.urls")),
     path("api/application/", include("apps.application.urls")),
-    path("tests/", include("apps.testing.urls"))
+    path("tests/", include("apps.testing.urls")),
 ]
 
 urlpatterns += swaggerurlpatterns

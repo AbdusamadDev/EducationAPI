@@ -1,8 +1,9 @@
 from rest_framework import generics
-from apps.application.api_endpoints.Create.serializers import ApplicationSerializer
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
+
+from apps.application.api_endpoints.Create.serializers import ApplicationSerializer
 from apps.application.models import Application
-from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class ApplicationCreateView(generics.CreateAPIView):
@@ -15,4 +16,4 @@ class ApplicationCreateView(generics.CreateAPIView):
         serializer.save(user=self.request.user)
 
 
-__all__ = ['ApplicationCreateView']
+__all__ = ["ApplicationCreateView"]

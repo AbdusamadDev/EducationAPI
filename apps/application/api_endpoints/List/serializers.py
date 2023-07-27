@@ -5,7 +5,6 @@ from apps.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ("id", "full_name", "phone", "faculty", "course")
@@ -16,4 +15,4 @@ class ApplicationListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = '__all__'
+        fields = "__all__"

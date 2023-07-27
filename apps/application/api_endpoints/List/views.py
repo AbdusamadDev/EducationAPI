@@ -1,6 +1,7 @@
 from rest_framework import generics
-from apps.application.api_endpoints.List.serializers import ApplicationListSerializer
 from rest_framework.permissions import IsAdminUser
+
+from apps.application.api_endpoints.List.serializers import ApplicationListSerializer
 from apps.application.models import Application
 
 
@@ -10,4 +11,4 @@ class ApplicationListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
 
 
-__all__ = ['ApplicationListView']
+__all__ = ["ApplicationListView"]

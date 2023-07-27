@@ -1,6 +1,7 @@
 from .base import *  # noqa
 
-STAGE="production"
+
+STAGE = "production"
 DEBUG = True
 DATABASES = {
     "default": {

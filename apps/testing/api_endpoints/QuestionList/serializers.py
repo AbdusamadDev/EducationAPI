@@ -1,11 +1,15 @@
 from rest_framework import serializers
-from apps.testing.models import Question, Answer, Quiz
+
+from apps.testing.models import Answer, Question, Quiz
 
 
 class AnswerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ("id", "answer_text",)
+        fields = (
+            "id",
+            "answer_text",
+        )
 
 
 class QuestionListSerializer(serializers.ModelSerializer):

@@ -1,4 +1,5 @@
 from rest_framework.generics import CreateAPIView
+
 from apps.users.api_endpoints.Register.serializers import UserCreateSerializer
 from apps.users.models import User
 

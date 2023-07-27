@@ -1,9 +1,10 @@
-from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.response import Response
-from apps.testing.models import Quiz, TestResult
-from apps.testing.api_endpoints.SubmitAnswers.utils import calculate_quiz_score
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.testing.api_endpoints.SubmitAnswers.utils import calculate_quiz_score
+from apps.testing.models import Quiz, TestResult
 
 
 class SubmitAnswersView(APIView):
@@ -21,11 +22,13 @@ class SubmitAnswersView(APIView):
 
         score, total_questions = calculate_quiz_score(quiz, user_answers)
 
-
         # Create the TestResult instance and save it
         test_result = TestResult.objects.create(user=request.user, quiz=quiz, score=score)
 
-        return Response({"score": score, "total_questions": total_questions, "result_id": test_result.id}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"score": score, "total_questions": total_questions, "result_id": test_result.id},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 __all__ = ["SubmitAnswersView"]

@@ -5,7 +5,6 @@ from apps.users.api_endpoints.Login.serializers import LoginByEmailSerializer
 
 
 class LoginByEmailnView(APIView):
-
     def post(self, request):
         serializer = LoginByEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
